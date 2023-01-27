@@ -1,5 +1,5 @@
 from IPython import display
-from typing import Optional, Union
+from typing import Optional
 import random
     
 # Constances
@@ -21,12 +21,25 @@ class DisplayBlock:
     
     def __init__(self):
         self.Elements = {}
+        # {
+        #   "example": "Pekora was here", 0
+        #   |       |  |               |  |
+        #   +---+---+  +-------+-------+  +-- Display order
+        #       |              |
+        #       |              +------------- Content
+        #       |
+        #       +---------------------------- Element name
+        # }
         self.mutable = True
         self._DisplayBlockID = random.randint(0, 0xffffffff)
     
-    def ModifyElement(self, element: str, text: str) -> None | EngineError:
+    def ModifyElement(self, element: str, text: str):
         if element in self.Elements.keys() or self.mutable:
-            self.Elements[element] = text
+            self.Elements[element][0] = text
+    
+    def ModifyDisplayOrder(self, element: str, num: int):
+        if element in self.Elements.keys() or self.mutable:
+            self.Elements[element][1] = num
     
     def RemoveElement(self, element: str):
         self.Elements.pop(element)
@@ -41,23 +54,31 @@ class Menu(DisplayBlock):
         match type_:
             case 0:
                 self.mutable = False
-                self.Elements["header"] = "# Your Game"
-                self.Elements["commands"] = \
-                    "New game &#x2014; `Player.NewGame()`\n" \
-                    "\n" \
-                    "Load game &#x2014; `Player.Load()`"
-                self.Elements["footer"] = \
-                    "----\n" \
-                    "Created by me"
+                self.Elements["header"] = ["# Your Game", 0]
+                self.Elements["commands"] = [
+                    "New game &#x2014; `Player.NewGame()`\n"
+                    "\n"
+                    "Load game &#x2014; `Player.Load()`",
+                    1
+                ]
+                self.Elements["footer"] = [
+                    "----\n"
+                    "Created by me",
+                    2
+                ]
             case 1:
-                self.Elements["header"] = "# Your Game"
-                self.Elements["commands"] = \
-                    "New game &#x2014; `Player.NewGame()`\n" \
-                    "\n" \
-                    "Load game &#x2014; `Player.Load()`"
-                self.Elements["footer"] = \
-                    "----\n" \
-                    "Created by me"
+                self.Elements["header"] = ["# Your Game", 0]
+                self.Elements["commands"] = [
+                    "New game &#x2014; `Player.NewGame()`\n"
+                    "\n"
+                    "Load game &#x2014; `Player.Load()`",
+                    1
+                ]
+                self.Elements["footer"] = [
+                    "----\n"
+                    "Created by me",
+                    2
+                ]
 
 class Renderer(CoreRenderer):
 
@@ -91,5 +112,8 @@ class Renderer(CoreRenderer):
                     self.Menu.ModifyElement(k, v)
     
     def DisplayMenu(self):
-        for i in self.Menu.Elements.values():
-            self.DisplayMd(i)
+        DisplayOrder = set([i[1] for i in self.Menu.Elements.values()])
+        for i0 in DisplayOrder:
+            for i1 in self.Menu.Elements.values():
+                if i1[1] == i0:
+                    self.DisplayMd(i1[0])
