@@ -33,19 +33,27 @@ class DisplayBlock:
         self.mutable = True
         self._DisplayBlockID = random.randint(0, 0xffffffff)
     
-    def ModifyElement(self, element: str, text: str):
-        if element in self.Elements.keys() or self.mutable:
+    def ModifyElement(self, element: str, text: str, display_order: int):
+        if element in self.Elements.keys():
             self.Elements[element][0] = text
+            self.Elements[element][1] = display_order
     
     def ModifyDisplayOrder(self, element: str, num: int):
         if element in self.Elements.keys() or self.mutable:
             self.Elements[element][1] = num
+    
+    def NewElement(self, element: str, text: str, display_order: int):
+        if self.mutable:
+            self.Elements[element] = [text, display_order]
     
     def RemoveElement(self, element: str):
         self.Elements.pop(element)
     
     def PopElement(self, element: str) -> tuple:
         return (element, self.Elements.pop(element))
+
+    def DisplayOrder(self) -> set[int]:
+        return set([i[1] for i in self.Elements.values()])
 
 class Menu(DisplayBlock):
     
@@ -108,12 +116,14 @@ class Renderer(CoreRenderer):
             for k, v in zip(extra_elements.keys(), extra_elements.values()):
                 if not self.Menu.mutable:
                     self.ShowError(self.ErrorCode.Index, message=f"The `CONDENSED_MENU` type menu is not mutable")
+                elif k not in self.Menu.Elements.keys():
+                    print(k, v)
+                    self.Menu.NewElement(k, v[0], v[1])
                 else:
-                    self.Menu.ModifyElement(k, v)
+                    self.Menu.ModifyElement(k, v[0], self.Menu.Elements[k][1])
     
     def DisplayMenu(self):
-        DisplayOrder = set([i[1] for i in self.Menu.Elements.values()])
-        for i0 in DisplayOrder:
+        for i0 in self.Menu.DisplayOrder():
             for i1 in self.Menu.Elements.values():
                 if i1[1] == i0:
                     self.DisplayMd(i1[0])
