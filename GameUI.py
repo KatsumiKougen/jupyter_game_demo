@@ -93,6 +93,7 @@ class Renderer(CoreRenderer):
     # Error codes
     class ErrorCode:
         Index = 0x22
+        EmptyString = 0x23
     
     def __init__(self):
         self.RendererID = random.randint(0, 0xffff)
@@ -117,7 +118,12 @@ class Renderer(CoreRenderer):
                 if not self.Menu.mutable:
                     self.ShowError(self.ErrorCode.Index, message=f"The `CONDENSED_MENU` type menu is not mutable")
                 elif k not in self.Menu.Elements.keys():
-                    self.Menu.NewElement(k, v[0], v[1])
+                    if v[0] == "":
+                        self.ShowError(self.ErrorCode.EmptyString, message=f"Element \"{k}\" is empty")
+                    elif v[1] < 0:
+                        self.ShowError(self.ErrorCode.Index, message=f"Element \"{k}\"'s display order cannot be a negative number")
+                    else:
+                        self.Menu.NewElement(k, v[0], v[1])
                 else:
                     self.Menu.ModifyElement(k, v[0], v[1])
     
