@@ -94,6 +94,8 @@ class Renderer(CoreRenderer):
     class ErrorCode:
         Index = 0x22
         EmptyString = 0x23
+        MissingParam = 0x24
+        WrongType = 0x25
     
     def __init__(self):
         self.RendererID = random.randint(0, 0xffff)
@@ -117,6 +119,12 @@ class Renderer(CoreRenderer):
             for k, v in zip(extra_elements.keys(), extra_elements.values()):
                 if not self.Menu.mutable:
                     self.ShowError(self.ErrorCode.Index, message=f"The `CONDENSED_MENU` type menu is not mutable")
+                elif len(v) < 2:
+                    self.ShowError(self.ErrorCode.MissingParam, message=f"Missing parameter, element \"{k}\" must have content and display order")
+                elif not isinstance(v[0], str):
+                    self.ShowError(self.ErrorCode.WrongType, message=f"\"{v[0]}\" is not a string")
+                elif not isinstance(v[1], int):
+                    self.ShowError(self.ErrorCode.WrongType, message=f"\"{v[1]}\" is not a number")
                 elif k not in self.Menu.Elements.keys():
                     if v[0] == "":
                         self.ShowError(self.ErrorCode.EmptyString, message=f"Element \"{k}\" is empty")
