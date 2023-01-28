@@ -119,7 +119,7 @@ class Renderer(CoreRenderer):
                 elif k not in self.Menu.Elements.keys():
                     self.Menu.NewElement(k, v[0], v[1])
                 else:
-                    self.Menu.ModifyElement(k, v[0], self.Menu.Elements[k][1])
+                    self.Menu.ModifyElement(k, v[0], v[1])
     
     def DisplayMenu(self):
         for i0 in self.Menu.DisplayOrder():
