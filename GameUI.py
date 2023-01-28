@@ -117,7 +117,6 @@ class Renderer(CoreRenderer):
                 if not self.Menu.mutable:
                     self.ShowError(self.ErrorCode.Index, message=f"The `CONDENSED_MENU` type menu is not mutable")
                 elif k not in self.Menu.Elements.keys():
-                    print(k, v)
                     self.Menu.NewElement(k, v[0], v[1])
                 else:
                     self.Menu.ModifyElement(k, v[0], self.Menu.Elements[k][1])
